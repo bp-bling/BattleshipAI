@@ -1,0 +1,37 @@
+body {
+    margin: 25px 75px;
+}
+#battleship {
+    font-family: Arial, sans-serif;
+}
+#volley {
+    padding: 6px 10px;
+}
+#result {
+    margin-left: 20px;
+    font-size: 12px;
+}
+#board {
+    margin-top: 25px;
+}
+td {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+    text-align: center;
+    border: 1px solid #888;
+    color: #888;
+}
+.ship {
+    background-color: #CCC;
+}
+.miss {
+    background-color: #6CF;
+}
+.hit {
+    background-color: #F00;
+}
+.sunk {
+    background-color: #000;
+    color: #FFF;
+}
