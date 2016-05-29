@@ -12,23 +12,27 @@ Result: The average win occurs after 55 moves.
 
 I forked http://jsfiddle.net/FgbAK/ and then attempted to detect sunken ships so the AI would no longer focus on areas known to contain a sunken ship.  This had the side effect of greatly decreasing the runtime, so I also fixed the runs at 1000
 
-Result: The average win occurs after 51 moves.
+Result: The average win occurs after 51 moves (10,000 runs)
 
 I then increased the skew factor for areas surrounding hits, because the original Data Genetics article states "a _heavy_ score weighting"
 
-Result: The average win occurs after 48 moves.
+Result: The average win occurs after 48 moves (10,000 runs)
 
 I then treated SUNK the same as MISS in the ship placement detection code
 
-Result: The average win occurs after 46.2073 moves.
+Result: The average win occurs after 46.2073 moves (10,000 runs)
 
 I then took sunk ships into account when calculating probabilities (instead of always including all 5 ships)
 
-Result: The average win occurs after 45.9515 moves.
+Result: The average win occurs after 45.9515 moves (10,000 runs)
 
 I then optimized a few things to reduce the time to simulate a game, making it much more bearable to run 10,000 simulations at a time.  Part of this was to remove the "store uniques to avoid skewing positions multiple times", which did not seem to positively or negatively affect the average win score
 
-Result: The average win occurs after 45.9539 moves.
+Result: The average win occurs after 45.9539 moves (10,000 runs)
+
+I then guessed ship orientation when there are two (or more) adjacent hits
+
+Result: The average win occurs after 44.94417 moves (bumped up to 100,000 runs)
 
 TODO: When random firing, take neighbours into account as per http://arnosoftwaredev.blogspot.ca/2008/06/battleship-game-algorithm-explained_19.html and  http://arnosoftwaredev.blogspot.ca/2008/07/battleship-game-algorithm-explained.html
 */
@@ -204,18 +208,94 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
     }
 
     function skewProbabilityAroundHits(toSkew) {
-        var realToSkew = [];
-
-        // add adjacent positions to the positions to be skewed
         for (var i = 0, l = toSkew.length; i < l; i++) {
-            realToSkew = realToSkew.concat(getAdjacentPositions(toSkew[i]));
-        }
+            // hit position
+            var x = toSkew[i][0],
+                y = toSkew[i][1];
+                
+            // skew to the right
+            if (x + 1 < boardSize) {
+                if (positions[x + 1][y] === HIT) {
+                    // position to the right of this hit is also a hit, so we may know the ship orientation,
+                    // so mark the left/right positions with a very high probability to ensure they're used next
+                    
+                    // mark to the left
+                    var tempx = x - 1;
+                    while (tempx >= 0) {
+                        if (positions[tempx][y] !== HIT) {
+                            probabilities[tempx][y] = 999999;
+                            break;
+                        }
+                        tempx--;
+                    }
+                    
+                    // mark to the right
+                    var tempx = x + 1;
+                    while (tempx < boardSize) {
+                        if (positions[tempx][y] !== HIT) {
+                            probabilities[tempx][y] = 999999;
+                            break;
+                        }
+                        tempx++;
+                    }
+                } else {
+                    // to the right is not a hit, so just skew normally
+                    if (probabilities[x + 1][y] != 999999) {
+                        probabilities[x + 1][y] *= skewFactor;
+                    }
+                }
+            }
 
-        for (var i = 0, l = realToSkew.length; i < l; i++) {
-            // skew probability
-            var x = realToSkew[i][0],
-                y = realToSkew[i][1];
-            probabilities[x][y] *= skewFactor;
+            // skew to the left
+            if (x - 1 >= 0) {
+                // skew to the right would have already checked for multiple horizontal hits next to each other, 
+                // so we can do a simple check here
+                if (probabilities[x - 1][y] != 999999) {
+                    probabilities[x - 1][y] *= skewFactor;
+                }
+            }
+            
+            // skew to the bottom
+            if (y + 1 < boardSize) {
+                if (positions[x][y + 1] === HIT) {
+                    // position to the bottom of this hit is also a hit, so we may know the ship orientation,
+                    // so mark the top/bottom positions with a very high probability to ensure they're used next
+                    
+                    // mark to the top
+                    var tempy = y - 1;
+                    while (tempy >= 0) {
+                        if (positions[x][tempy] !== HIT) {
+                            probabilities[x][tempy] = 999999;
+                            break;
+                        }
+                        tempy--;
+                    }
+                    
+                    // mark to the bottom
+                    var tempy = y + 1;
+                    while (tempy < boardSize) {
+                        if (positions[x][tempy] !== HIT) {
+                            probabilities[x][tempy] = 999999;
+                            break;
+                        }
+                        tempy++;
+                    }
+                } else {
+                    // to the bottom is not a hit, so just skew normally
+                    if (probabilities[x][y + 1] != 999999) {
+                        probabilities[x][y + 1] *= skewFactor;
+                    }
+                }
+            }
+
+            // skew to the top
+            if (y - 1 >= 0) {
+                // skew to the bottom would have already checked for multiple vertical hits next to each other, 
+                // so we can do a simple check here
+                if (probabilities[x][y - 1] != 999999) {
+                    probabilities[x][y - 1] *= skewFactor;
+                }
+            }
         }
     }
 
