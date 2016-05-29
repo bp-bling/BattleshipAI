@@ -424,8 +424,9 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
     }
 
     function runMonteCarlo() {
-        var elapsed, sum = 0,
-            runs = 10000;
+        var elapsed, sum = 0, median,
+            runs = 10000,
+            allMoves = new Array(runs);
             
 
         elapsed = (new Date()).getTime();
@@ -438,12 +439,26 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
                 moves++;
             }
             sum += moves;
+            allMoves[i] = moves;
         }
 
         elapsed = (new Date()).getTime() - elapsed;
         console.log('test duration: ' + elapsed + 'ms');
 
-        resultMsg.innerHTML = 'Average moves: ' + (sum / runs) + ' ( over ' + runs + ' runs)';
+        median = findMedian(allMoves);
+        
+        resultMsg.innerHTML = 'Average: ' + (sum / runs) + ', Median: ' + median + ' ( over ' + runs + ' runs)';
+    }
+    
+    function findMedian(data) {
+        data.sort(function(a, b) { return a - b; });
+
+        var middle = Math.floor((data.length - 1) / 2); // NB: operator precedence
+        if (data.length % 2) {
+            return data[middle];
+        } else {
+            return (data[middle] + data[middle + 1]) / 2.0;
+        }
     }
 
 }(document));
