@@ -20,18 +20,17 @@ td {
     font-size: 11px;
     text-align: center;
     border: 1px solid #888;
-    color: #888;
+    color: #FFF;
 }
 .ship {
-    background-color: #CCC;
+    background-color: #999;
 }
 .miss {
-    background-color: #6CF;
+    background-color: #EEE;
 }
 .hit {
     background-color: #F00;
 }
 .sunk {
-    background-color: #000;
-    color: #FFF;
+    background-color: #600;
 }

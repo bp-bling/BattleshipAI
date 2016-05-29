@@ -27,6 +27,63 @@
           <input id="volley" type="button" value="Begin Volley" /> <span id="result"></span>
           <table id="board"></table>
         </div>
+        
+        <h3>Inspiration</h3>
+        <div><a href="http://www.datagenetics.com/blog/december32011/" target="_blank">http://www.datagenetics.com/blog/december32011/</a></div>
+        <br />
+        
+        <h3>Original Version</h3>
+        <div><a href="http://jsfiddle.net/FgbAK/" target="_blank">http://jsfiddle.net/FgbAK/</a></div>
+        <div>The average win occurs after 55 moves</div>
+        <br />
+        
+        <h3>My Changes (reverse chrono)</h3>
+        <ul>
+          <li>
+            Guess ship orientation when there are two adjacent hits, and assign increased probability accordingly.
+            <ul><li>The average win occurs after 44.94417 moves (bumped up to 100,000 runs)</li></ul>
+          </li>
+          <br />
+
+          <li>
+            Optimized some of the code (mostly array related) to reduce time to run 10,000 simulations.
+            Also remove the "store uniques to avoid skewing positions multiple times" logic, which did not seem to positively or negatively affect the average shot count,
+            but did greatly reduce the runtime for 10,000 simulations.
+            <ul><li>The average win occurs after 45.9539 moves (10,000 runs)</li></ul>
+          </li>
+          <br />
+
+          <li>
+            Exclude sunk ships when calculating ship placement probabilities.
+            <ul><li>The average win occurs after 45.9515 moves (10,000 runs)</li></ul>
+          </li>
+          <br />
+
+          <li>
+            Treat SUNK positions the same as MISS positions when determining where a ship can fit, which is used to calculate probabilities.
+            <ul><li>The average win occurs after 46.2073 moves (10,000 runs)</li></ul>
+          </li>
+          <br />
+
+          <li>
+            Increase skew factor for positions adjacent to hits.  The original code used a factor of 2, but the Data Genetics article says to use
+            "a <strong>heavy</strong> score weighting", so I bumped this up to 10.
+            <ul><li>The average win occurs after 48 moves (10,000 runs)</li></ul>
+          </li>
+          <br />
+
+          <li>
+            Detect sunken ships.  The original code skewed the probability on positions adjacent to hits.  Since it did not track sunken ships that
+            meant it would continue to focus on the area around a ship long after it had been sunk, wasting shots.
+            <ul><li>The average win occurs after 51 moves (averaged across 10,000 runs)</li></ul>
+          </li>
+          <br />
+        </ul>
+        
+        <h3>TODO List</h3>
+        <ul>
+          <li>When random firing, take neighbours into account as per http://arnosoftwaredev.blogspot.ca/2008/06/battleship-game-algorithm-explained_19.html and  http://arnosoftwaredev.blogspot.ca/2008/07/battleship-game-algorithm-explained.html</li>
+        </ul>
       </section>
     </div>
 
