@@ -59,6 +59,7 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
         board,
         resultMsg,
         volleyButton,
+        monteCarloCheckbox,
         monteCarlo = false;
 
     // run immediately
@@ -69,6 +70,12 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
         resultMsg = document.getElementById('result');
         volleyButton = document.getElementById('volley');
         volleyButton.onclick = (monteCarlo ? runMonteCarlo : beginVolley);
+        monteCarloCheckbox = document.getElementById('montecarlo');
+        monteCarloCheckbox.onclick = function() {
+            monteCarlo = monteCarloCheckbox.checked;
+            volleyButton.onclick = (monteCarlo ? runMonteCarlo : beginVolley);
+            redrawBoard(true);
+        };
         setupBoard();
     }
 
@@ -130,19 +137,22 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
     }
 
     function redrawBoard(displayProbability) {
-        if (monteCarlo) return; // no need to draw when testing thousands of boards
         var boardHTML = '';
-        for (var y = 0; y < boardSize; y++) {
-            boardHTML += '<tr>';
-            for (var x = 0; x < boardSize; x++) {
-                var thisPos = positions[x][y];
-                boardHTML += '<td class="';
-                if (thisPos !== UNKNOWN) boardHTML += classMapping[thisPos];
-                boardHTML += '">';
-                if (displayProbability && thisPos != MISS && thisPos !== HIT) boardHTML += probabilities[x][y];
-                boardHTML += '</td>';
+        if (monteCarlo) {
+            boardHTML = '<em style="color: red;">Board not visible when running Monte Carlo simulations</em>';
+        } else {
+            for (var y = 0; y < boardSize; y++) {
+                boardHTML += '<tr>';
+                for (var x = 0; x < boardSize; x++) {
+                    var thisPos = positions[x][y];
+                    boardHTML += '<td class="';
+                    if (thisPos !== UNKNOWN) boardHTML += classMapping[thisPos];
+                    boardHTML += '">';
+                    if (displayProbability && thisPos != MISS && thisPos !== HIT) boardHTML += probabilities[x][y];
+                    boardHTML += '</td>';
+                }
+                boardHTML += '</tr>';
             }
-            boardHTML += '</tr>';
         }
         board.innerHTML = boardHTML;
     }
@@ -336,6 +346,7 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
         if (hitsMade > 0) setupBoard();
         resultMsg.innerHTML = '';
         volleyButton.disabled = true;
+        monteCarloCheckbox.disabled = true;
         var moves = 0,
             volley = setInterval(function () {
                 fireAtBestPosition();
@@ -344,6 +355,7 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
                     resultMsg.innerHTML = 'All ships sunk in ' + moves + ' moves.';
                     clearInterval(volley);
                     volleyButton.disabled = false;
+                    monteCarloCheckbox.disabled = false;
                 }
             }, 250);
     }
@@ -447,7 +459,7 @@ TODO: When random firing, take neighbours into account as per http://arnosoftwar
 
         median = findMedian(allMoves);
         
-        resultMsg.innerHTML = 'Average: ' + (sum / runs) + ', Median: ' + median + ' ( over ' + runs + ' runs)';
+        resultMsg.innerHTML = 'Average: ' + (sum / runs) + ', Median: ' + median + ' (' + runs + ' runs took ' + elapsed + 'ms)';
     }
     
     function findMedian(data) {
